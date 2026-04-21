@@ -1,7 +1,11 @@
 import { pool } from "../config/db";
 
-export const getAllMaterials = async () => {
-  return await pool.query("SELECT * FROM materials ORDER BY id ASC");
+export const getAllMaterials = async (limit: number, offset: number) => {
+  return await pool.query("SELECT * FROM materials ORDER BY id ASC LIMIT $1 OFFSET $2", [limit, offset]);
+};
+
+export const getTotalMaterials = async () => {
+  return await pool.query("SELECT COUNT(*) FROM materials");
 };
 
 export const getMaterialById = async (id: number) => {
