@@ -5,6 +5,8 @@ import {
   createLoan,
   returnLoan,
   extendLoan,
+  deleteLoan,
+  updateLoan,
   getMaterialStatus,
   setMaterialLoaned,
   setMaterialAvailable,
@@ -118,6 +120,59 @@ export const extendLoanById = async (req: Request, res: Response) => {
     }
 
     const result = await extendLoan(id, return_date);
+    res.status(200).json({ ok: true, data: result.rows[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, message: "Error en el servidor" });
+  }
+};
+
+export const deleteLoanById = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id as string);
+
+    const loanResult = await getLoanById(id);
+
+    if (loanResult.rowCount === 0) {
+      res.status(404).json({ ok: false, message: "El préstamo no se ha encontrado" });
+      return;
+    }
+
+    if (loanResult.rows[0].status !== "returned") {
+      await setMaterialAvailable(loanResult.rows[0].material_id);
+    }
+
+    await deleteLoan(id);
+    res.status(200).json({ ok: true, message: "El préstamo ha sido eliminado" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, message: "Error en el servidor" });
+  }
+};
+
+export const updateLoanById = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id as string);
+    const { borrower_name, borrower_contact, loan_date } = req.body;
+
+    if (!borrower_name || !borrower_contact || !loan_date) {
+      res.status(400).json({ ok: false, message: "Todos los campos son obligatorios" });
+      return;
+    }
+
+    const loanResult = await getLoanById(id);
+
+    if (loanResult.rowCount === 0) {
+      res.status(404).json({ ok: false, message: "El préstamo no se ha encontrado" });
+      return;
+    }
+
+    if (loanResult.rows[0].status === "returned") {
+      res.status(400).json({ ok: false, message: "No se puede modificar un préstamo ya devuelto" });
+      return;
+    }
+
+    const result = await updateLoan(id, borrower_name, borrower_contact, loan_date);
     res.status(200).json({ ok: true, data: result.rows[0] });
   } catch (error) {
     console.error(error);
