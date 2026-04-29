@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import {
   getAllMaterials,
+  getTotalMaterials,
   getMaterialById,
   createMaterial,
   updateMaterial,
@@ -32,8 +33,27 @@ export const upload = multer({
 
 export const getMaterials = async (req: Request, res: Response) => {
   try {
-    const result = await getAllMaterials();
-    res.status(200).json({ ok: true, data: result.rows });
+    const page = parseInt(req.query.page as string) || 1;
+    const size = parseInt(req.query.size as string) || 10;
+    const offset = (page - 1) * size;
+
+    const [result, totalResult] = await Promise.all([
+      getAllMaterials(size, offset),
+      getTotalMaterials(),
+    ]);
+
+    const total = parseInt(totalResult.rows[0].count);
+
+    res.status(200).json({
+      ok: true,
+      data: result.rows,
+      pagination: {
+        total,
+        page,
+        size,
+        totalPages: Math.ceil(total / size),
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ ok: false, message: "Error en el servidor" });
