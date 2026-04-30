@@ -51,3 +51,19 @@ export const extendLoan = async (id: number, return_date: string) => {
     [return_date, id]
   );
 };
+
+export const deleteLoan = async (id: number) => {
+  return await pool.query("DELETE FROM loans WHERE id = $1 RETURNING *", [id]);
+};
+
+export const updateLoan = async (
+  id: number,
+  borrower_name: string,
+  borrower_contact: string,
+  loan_date: string
+) => {
+  return await pool.query(
+    "UPDATE loans SET borrower_name = $1, borrower_contact = $2, loan_date = $3 WHERE id = $4 RETURNING *",
+    [borrower_name, borrower_contact, loan_date, id]
+  );
+};
