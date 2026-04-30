@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import userRoutes from "./routes/user.routes";
+import authRoutes from "./routes/auth.routes";
 import materialRoutes from "./routes/material.routes";
 import loanRoutes from "./routes/loan.routes";
 import imagesMaterialRoutes from "./routes/images_material.routes";
@@ -17,6 +18,7 @@ app.use(
 app.use(express.json());
 
 app.use("/api/users", userRoutes);
+app.use("/auth", authRoutes);
 //para las imagenes de los materiales
 app.use('/public/materials', express.static(path.join(__dirname, '../Images')));
 app.use("/api/materials", materialRoutes);
