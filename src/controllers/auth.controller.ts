@@ -4,10 +4,10 @@ import { createUser, findUserByEmail } from "../services/auth.service";
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { name, second_name, email, password } = req.body;
 
-    if (!email || !password) {
-      res.status(400).json({ ok: false, error: "Email y password son obligatorios" });
+    if (!name || !second_name || !email || !password) {
+      res.status(400).json({ ok: false, error: "Todos los campos son obligatorios" });
       return;
     }
 
@@ -17,8 +17,8 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
-    if (password.length < 6) {
-      res.status(400).json({ ok: false, error: "El password debe tener al menos 6 caracteres" });
+    if (password.length < 8) {
+      res.status(400).json({ ok: false, error: "El password debe tener al menos 8 caracteres" });
       return;
     }
 
@@ -29,9 +29,9 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await createUser(email, hashedPassword);
+    const newUser = await createUser(name, second_name, email, hashedPassword);
 
-    res.status(201).json(newUser);
+    res.status(201).json({ ok: true, user: newUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ ok: false, error: "Error en el servidor" });

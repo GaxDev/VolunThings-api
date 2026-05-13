@@ -69,6 +69,21 @@ INSERT INTO images_materials (material_id, image_url) VALUES
   (5, 'http://localhost:3000/public/materials/sillaplegable_3.webp'),
   (6, 'http://localhost:3000/public/materials/mesaplegable_3.webp'),
   (7, 'http://localhost:3000/public/materials/altavozjbl_3.webp'),
-  (7, 'http://localhost:3000/public/materials/altavozjbl_4.webp'),
+  (7, 'http://localhost:3000/public/materials/altavozjbl_4.webp');
 
 
+-- USUARIOS
+CREATE TABLE IF NOT EXISTS users (
+  id          SERIAL PRIMARY KEY,
+  name        VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  email       VARCHAR(255) NOT NULL UNIQUE,
+  password    VARCHAR(255) NOT NULL,
+  created_at  TIMESTAMP DEFAULT NOW()
+);
+
+-- Migración: añadir columnas si la tabla ya existía sin ellas
+ALTER TABLE users ADD COLUMN IF NOT EXISTS name        VARCHAR(100) NOT NULL DEFAULT '';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(100) NOT NULL DEFAULT '';
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);
