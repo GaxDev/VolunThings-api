@@ -1,11 +1,18 @@
 import { pool } from "../config/db";
 
-export const getAllMaterials = async (limit: number, offset: number) => {
-  return await pool.query("SELECT * FROM materials ORDER BY id ASC LIMIT $1 OFFSET $2", [limit, offset]);
-};
-
-export const getTotalMaterials = async () => {
-  return await pool.query("SELECT COUNT(*) FROM materials");
+export const getAllMaterials = async () => {
+  return await pool.query(`
+    SELECT
+      m.*,
+      COALESCE(
+        JSON_AGG(im.image_url ORDER BY im.id) FILTER (WHERE im.image_url IS NOT NULL),
+        '[]'
+      ) AS images
+    FROM materials m
+    LEFT JOIN images_materials im ON im.material_id = m.id
+    GROUP BY m.id
+    ORDER BY m.id ASC
+  `);
 };
 
 export const getMaterialById = async (id: number) => {
@@ -15,11 +22,12 @@ export const getMaterialById = async (id: number) => {
 export const createMaterial = async (
   name: string,
   category: string,
-  description: string
+  description: string,
+  status: string = "available"
 ) => {
   return await pool.query(
-    "INSERT INTO materials (name, category, description) VALUES ($1, $2, $3) RETURNING *",
-    [name, category, description]
+    "INSERT INTO materials (name, category, description, status) VALUES ($1, $2, $3, $4) RETURNING *",
+    [name, category, description, status]
   );
 };
 
