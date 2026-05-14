@@ -14,3 +14,11 @@ export const findUserByEmail = async (email: string) => {
   ]);
   return rows[0];
 };
+
+export const findUserById = async (id: number) => {
+  const { rows } = await pool.query(
+    "SELECT id, email, created_at FROM users WHERE id = $1",
+    [id]
+  );
+  return rows[0];
+};

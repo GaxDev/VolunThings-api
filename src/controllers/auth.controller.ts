@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { createUser, findUserByEmail } from "../services/auth.service";
+import { createUser, findUserByEmail, findUserById } from "../services/auth.service";
+import { JwtPayload } from "jsonwebtoken";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -77,5 +78,22 @@ export const login = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ ok: false, error: "Error en el servidor" });
+  }
+};
+
+export const getProfile = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.user as JwtPayload;
+    const user = await findUserById(id);
+
+    if (!user) {
+      res.status(404).json({ ok: false, message: "Usuario no encontrado" });
+      return;
+    }
+
+    res.status(200).json({ ok: true, data: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, message: "Error en el servidor" });
   }
 };
